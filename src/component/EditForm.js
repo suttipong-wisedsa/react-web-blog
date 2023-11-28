@@ -4,15 +4,21 @@ import { Button, Form, Input, InputNumber, Row, Col } from "antd";
 import { Route, Link, Routes, useNavigate,useParams } from "react-router-dom";
 import axios from "axios";
 import { useEffect, useState } from "react";
-
+import { useSelector, useDispatch } from "react-redux";
+import { decrement, increment,setListPost } from "../redux/slice";
 const { TextArea } = Input;
 function EditForm() {
+  const open = useSelector((state) => state.slice.open);
+  const open_edit = useSelector((state) => state.slice.modalEdit);
+  const editId = useSelector((state) => state.slice.editId);
+  const dispatch = useDispatch();
     const [form] = Form.useForm();
     let { id } = useParams();
   useEffect(() => {
+    if(open_edit == false) return
     axios
       .get(
-        `https://post-api.opensource-technology.com/api/posts/${id}`
+        `https://post-api.opensource-technology.com/api/posts/${editId}`
       )
       .then((res) => {
         console.log(res)
@@ -24,7 +30,7 @@ function EditForm() {
       .catch((err) => {
         return false;
       });
-  }, []);
+  }, [open_edit]);
   const navigate = useNavigate();
   const layout = {
     labelCol: {

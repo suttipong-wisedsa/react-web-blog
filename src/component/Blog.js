@@ -4,20 +4,24 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Moment from "react-moment";
 import { Input } from "antd";
-import type { PaginationProps } from "antd";
 import { Pagination } from "antd";
+import { useSelector, useDispatch } from "react-redux";
+import { decrement, increment,setListPost,modalOpen,setIdEdit } from "../redux/slice";
 const { Search } = Input;
 function Blog() {
   const [state, setState] = useState([]);
   const [search, setSearch] = useState("");
   const [current, setCurrent] = useState("1");
   const [pageSize, setPageSize] = useState("10");
+  const postList = useSelector((state) => state.slice.postList);
+  const dispatch = useDispatch();
   useEffect(() => {
     axios
       .get(
         `https://post-api.opensource-technology.com/api/posts?page=${current}&limit=${pageSize}`
       )
       .then((res) => {
+        // dispatch(setListPost(res.data.posts));
         setState(res.data.posts);
       })
       .catch((err) => {
@@ -27,10 +31,14 @@ function Blog() {
   const onSearch = (value, _e, info) => {
     setSearch(value.target.value);
   };
-  const onChange: PaginationProps["onChange"] = (page) => {
+  const onChange = (page) => {
     setCurrent(page);
   };
-  const onShowSizeChange: PaginationProps["onShowSizeChange"] = (
+  function editModal(val){
+    dispatch(setIdEdit(val));
+    dispatch(modalOpen());
+  }
+  const onShowSizeChange = (
     current,
     pageSize
   ) => {
@@ -51,7 +59,7 @@ function Blog() {
               </Col>
               <Col sm={24} md={3}>
                 <div style={{ alignSelf: "center",display:'flex' }}>
-                <Button type="primary" style={{width:'100%'}}>Edit</Button>
+                <Button type="primary" style={{width:'100%'}} onClick={() => editModal(val)}>Edit</Button>
                 </div>
               </Col>
             </Row>

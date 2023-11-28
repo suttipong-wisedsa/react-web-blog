@@ -2,22 +2,19 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import reportWebVitals from "./reportWebVitals";
-import { Provider } from 'react-redux';
-import store from './store';
 import {
   createBrowserRouter,
   RouterProvider,
-  // Route,
-  // Link,
 } from "react-router-dom";
 import Draft from "./pages/Draft";
 import CreateDraft from "./pages/Create_draft";
 import App from "./App";
 import Nav from "./component/Nav";
 import EditForm from "./pages/Edit_Form";
-// import { Provider } from "react-redux";
-// import  {store}  from "./api/create";
-// import DraftById from "./pages/DraftById";
+import { useNavigate } from "react-router-dom";
+import { Provider } from "react-redux";
+import {store} from './store'
+import { BrowserRouter } from "react-router-dom";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -39,10 +36,9 @@ const router = createBrowserRouter([
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-      <Nav />
-      <Provider store={store}>
+    <Provider store={store}>
       <RouterProvider router={router} />
-      </Provider>
+    </Provider>
   </React.StrictMode>
 );
 reportWebVitals();
