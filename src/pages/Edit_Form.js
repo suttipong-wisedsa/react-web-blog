@@ -1,8 +1,8 @@
-import Draft from "../component/Draft";
+import EditForm from "../component/EditForm";
 function App() {
   return (
    <div className="App"  style={{fontFamily:'Prompt'}}>
-    <Draft />
+    <EditForm />
    </div>
   );
 }
