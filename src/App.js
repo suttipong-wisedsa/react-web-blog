@@ -33,20 +33,22 @@ function App() {
       <Nav />
       <Blog />
       <Modal
-        title="Basic Modal"
+        title="Create Form"
         open={open}
         onOk={handleOk}
         onCancel={handleCancel}
-        width={"80%"}
+        width={"50%"}
+        footer={null}
       >
         <CreateForm />
       </Modal>
       <Modal
-        title="Basic Modal"
+        title="Edit Form"
         open={open_edit}
         onOk={handleOkEdit}
         onCancel={handleCancelEdit}
-        width={"80%"}
+        width={"50%"}
+        footer={null}
       >
         <EditForm />
       </Modal>

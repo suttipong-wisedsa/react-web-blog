@@ -1,12 +1,31 @@
 import { Card } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { Button, Form, Input, InputNumber, Row, Col } from "antd";
-import {Route, Link, Routes, useNavigate} from 'react-router-dom';
+import {
+  Route,
+  Link,
+  Routes,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 import axios from "axios";
-
+import { useEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  decrement,
+  increment,
+  setListPost,
+  modalOpen,
+  setData,
+  setIdEdit,
+} from "../redux/slice";
 const { TextArea } = Input;
 function CreateForm() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const location = useLocation();
+  const [loadings, setLoadings] = useState(false);
+  const { hash, pathname, search } = location;
   const layout = {
     labelCol: {
       span: 8,
@@ -17,19 +36,27 @@ function CreateForm() {
   };
   const onFinish = async (values) => {
     let payload = {
-      content: values.Title,
-      title: values.Content
-    }
-   await axios
-    .post(
-      `https://post-api.opensource-technology.com/api/posts`,payload
-    )
-    .then((res) => {
-      navigate(-1);
-    })
-    .catch((err) => {
-      alert('Error')
-    });
+      content: values.Content,
+      title: values.Title,
+    };
+    setLoadings(true)
+    await axios
+      .post(`https://post-api.opensource-technology.com/api/posts`, payload)
+      .then((res) => {
+        console.log(res.data)
+        if (pathname == "/") {
+          dispatch(setData(true))
+          setLoadings(false)
+          handleCancel();
+        }else {
+          setLoadings(false)
+          handleCancel();
+        }
+      })
+      .catch((err) => {
+        setLoadings(false)
+        alert("Error");
+      });
   };
   const validateMessages = {
     required: "${label} is required!",
@@ -41,15 +68,14 @@ function CreateForm() {
       range: "${label} must be between ${min} and ${max}",
     },
   };
+  const handleCancel = () => {
+    dispatch(decrement());
+  };
   return (
     <div>
       <Row justify="center">
-        <Col xs={20} sm={20} md={15} lg={15} xl={15}>
-          <Card
-            title="New Post"
-            bordered={false}
-            style={{ width: "100%", marginTop: "20px" }}
-          >
+        <Col xs={20} sm={20} md={24} lg={24} xl={24}>
+          <div title="New Post" style={{ width: "100%", marginTop: "20px" }}>
             <p>Title</p>
             <Form
               name="nest-messages"
@@ -80,12 +106,15 @@ function CreateForm() {
               >
                 <Input.TextArea />
               </Form.Item>
-              <Form.Item
-              >
-                <Row style={{ marginTop: "10px", width:'100%'}} justify='space-between'>
+              <Form.Item>
+                <Row
+                  style={{ marginTop: "10px", width: "100%" }}
+                  justify="space-between"
+                >
                   <Col span={10}>
                     <div style={{ display: "flex" }}>
                       <Button
+                        loading={loadings}
                         htmlType="submit"
                         type="primary"
                         style={{ width: "100%", marginRight: "10px" }}
@@ -98,14 +127,19 @@ function CreateForm() {
                     </div>
                   </Col>
                   <Col span={5}>
-                    <Button type="primary" style={{ width: "100%" }}  htmlType="reset">
+                    <Button
+                      type="primary"
+                      style={{ width: "100%" }}
+                      htmlType="reset"
+                      onClick={() => handleCancel()}
+                    >
                       Cancel
                     </Button>
                   </Col>
                 </Row>
               </Form.Item>
             </Form>
-          </Card>
+          </div>
         </Col>
       </Row>
     </div>

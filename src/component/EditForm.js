@@ -1,31 +1,37 @@
 import { Card } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { Button, Form, Input, InputNumber, Row, Col } from "antd";
-import { Route, Link, Routes, useNavigate,useParams } from "react-router-dom";
+import {
+  Route,
+  Link,
+  Routes,
+  useNavigate,
+  useParams,
+  useLocation,
+} from "react-router-dom";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { decrement, increment,setListPost } from "../redux/slice";
+import { decrement, increment, setListPost,closeModal } from "../redux/slice";
 const { TextArea } = Input;
 function EditForm() {
   const open = useSelector((state) => state.slice.open);
   const open_edit = useSelector((state) => state.slice.modalEdit);
   const editId = useSelector((state) => state.slice.editId);
+  const location = useLocation();
+  const { hash, pathname, search } = location;
   const dispatch = useDispatch();
-    const [form] = Form.useForm();
-    let { id } = useParams();
+  const [form] = Form.useForm();
+  let { id } = useParams();
   useEffect(() => {
-    if(open_edit == false) return
+    if (open_edit == false) return;
     axios
-      .get(
-        `https://post-api.opensource-technology.com/api/posts/${editId}`
-      )
+      .get(`https://post-api.opensource-technology.com/api/posts/${editId}`)
       .then((res) => {
-        console.log(res)
         form.setFieldsValue({
-            Title: res.data.title,
-            Content: res.data.content
-         });
+          Title: res.data.title,
+          Content: res.data.content,
+        });
       })
       .catch((err) => {
         return false;
@@ -40,15 +46,32 @@ function EditForm() {
       span: 16,
     },
   };
+  async function delete_form(id) {
+    let text = "confirm to delete";
+    if (window.confirm(text) == true) {
+      await axios
+        .delete(`https://post-api.opensource-technology.com/api/posts/${id}`)
+        .then((res) => {
+            dispatch(closeModal());
+            return true;
+        })
+        .catch((err) => {
+          return false;
+        });
+    }
+  }
   const onFinish = async (values) => {
     let payload = {
-      content: values.Title,
-      title: values.Content,
+      content: values.Content,
+      title: values.Title,
     };
     await axios
-      .post(`https://post-api.opensource-technology.com/api/posts`, payload)
+      .patch(
+        `https://post-api.opensource-technology.com/api/posts/${editId}`,
+        payload
+      )
       .then((res) => {
-        navigate(-1);
+        dispatch(closeModal());
       })
       .catch((err) => {
         alert("Error");
@@ -67,14 +90,11 @@ function EditForm() {
   return (
     <div>
       <Row justify="center">
-        <Col xs={20} sm={20} md={15} lg={15} xl={15}>
-          <Card
-            title="Edit Post"
-            bordered={false}
-            style={{ width: "100%", marginTop: "20px" }}
-          >
+        <Col xs={20} sm={20} md={24} lg={24} xl={24}>
+          <div style={{ width: "100%", marginTop: "20px" }}>
             <p>Title</p>
-            <Form form={form}
+            <Form
+              form={form}
               name="nest-messages"
               onFinish={onFinish}
               style={{
@@ -117,9 +137,15 @@ function EditForm() {
                       >
                         Save
                       </Button>
-                      <Button type="primary" style={{ width: "100%" }}>
-                        Publish Now
+                      {pathname == "/draft" ? (
+                        <Button type="primary" style={{ width: "100%" }}>
+                          Publish Now
+                        </Button>
+                      ) : (
+                        <Button type="primary" onClick={() => delete_form(editId)}>
+                        Delete
                       </Button>
+                      )}
                     </div>
                   </Col>
                   <Col span={5}>
@@ -134,7 +160,7 @@ function EditForm() {
                 </Row>
               </Form.Item>
             </Form>
-          </Card>
+          </div>
         </Col>
       </Row>
     </div>

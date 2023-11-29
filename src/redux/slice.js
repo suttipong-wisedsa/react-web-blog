@@ -5,7 +5,8 @@ const initialState = {
   open: false,
   postList: [],
   modalEdit: false,
-  editId: ''
+  editId: '',
+  setdatavalue:false
 };
 
 export const counterSlice = createSlice({
@@ -30,6 +31,10 @@ export const counterSlice = createSlice({
     setIdEdit: (state, action) => {
         state.editId = String(action.payload.id);
       },
+    setData: (state, action) => {
+        state.setdata = !action.payload
+        console.log(state.setdata)
+      },
     incrementByAmount: (state, action) => {
       state.value += action.payload;
     },
@@ -37,7 +42,7 @@ export const counterSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const { increment, decrement, incrementByAmount, setListPost ,modalOpen,closeModal,setIdEdit} =
+export const { increment, decrement, incrementByAmount, setListPost ,modalOpen,closeModal,setIdEdit,setData} =
   counterSlice.actions;
 
 export default counterSlice.reducer;
