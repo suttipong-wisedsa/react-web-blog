@@ -12,7 +12,7 @@ import {
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { decrement, increment, setListPost,closeModal } from "../redux/slice";
+import { decrement, increment, setListPost, closeModal } from "../redux/slice";
 const { TextArea } = Input;
 function EditForm() {
   const open = useSelector((state) => state.slice.open);
@@ -23,6 +23,8 @@ function EditForm() {
   const dispatch = useDispatch();
   const [form] = Form.useForm();
   let { id } = useParams();
+  const titleValue = form.getFieldValue('Title');
+  const contentValue = form.getFieldValue('Content');
   useEffect(() => {
     if (open_edit == false) return;
     axios
@@ -46,14 +48,33 @@ function EditForm() {
       span: 16,
     },
   };
+  async function publish() {
+    let payload = {
+      content: contentValue,
+      published: true,
+      title: titleValue,
+    };
+    await axios
+      .patch(
+        `https://post-api.opensource-technology.com/api/posts/${editId}`,
+        payload
+      )
+      .then((res) => {
+        dispatch(closeModal());
+      })
+      .catch((err) => {
+        alert("Error");
+        return false;
+      });
+  }
   async function delete_form(id) {
     let text = "confirm to delete";
     if (window.confirm(text) == true) {
       await axios
         .delete(`https://post-api.opensource-technology.com/api/posts/${id}`)
         .then((res) => {
-            dispatch(closeModal());
-            return true;
+          dispatch(closeModal());
+          return true;
         })
         .catch((err) => {
           return false;
@@ -138,13 +159,22 @@ function EditForm() {
                         Save
                       </Button>
                       {pathname == "/draft" ? (
-                        <Button type="primary" style={{ width: "100%" }}>
+                        <Button
+                          type="primary"
+                          style={{ width: "100%", backgroundColor: "green" }}
+                          onClick={() => publish()}
+                        >
                           Publish Now
                         </Button>
                       ) : (
-                        <Button type="primary" onClick={() => delete_form(editId)}>
-                        Delete
-                      </Button>
+                        <Button
+                          type="primary"
+                          style={{ width: "100%" }}
+                          onClick={() => delete_form(editId)}
+                          danger
+                        >
+                          Delete
+                        </Button>
                       )}
                     </div>
                   </Col>
@@ -153,6 +183,7 @@ function EditForm() {
                       type="primary"
                       style={{ width: "100%" }}
                       htmlType="reset"
+                      danger
                     >
                       Cancel
                     </Button>

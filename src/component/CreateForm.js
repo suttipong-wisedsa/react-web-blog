@@ -121,7 +121,7 @@ function CreateForm() {
                       >
                         Save
                       </Button>
-                      <Button type="primary" style={{ width: "100%" }}>
+                      <Button type="primary" style={{ width: "100%",backgroundColor: 'green' }}>
                         Publish Now
                       </Button>
                     </div>
@@ -132,6 +132,7 @@ function CreateForm() {
                       style={{ width: "100%" }}
                       htmlType="reset"
                       onClick={() => handleCancel()}
+                      danger
                     >
                       Cancel
                     </Button>

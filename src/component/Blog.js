@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, Row, Col, Button, Skeleton } from "antd";
+import { Card, Row, Col, Button, Skeleton, DatePicker, Grid, Tag } from "antd";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Moment from "react-moment";
@@ -12,9 +12,12 @@ import {
   setListPost,
   modalOpen,
   setIdEdit,
+  setData,
 } from "../redux/slice";
 const { Search } = Input;
 function Blog() {
+  const { useBreakpoint } = Grid;
+  const screens = useBreakpoint();
   const [state, setState] = useState([]);
   const [search, setSearch] = useState("");
   const [current, setCurrent] = useState("1");
@@ -22,15 +25,20 @@ function Blog() {
   const [timer, setTimer] = useState(null);
   const [loading, setLoading] = useState(false);
   const [watch, setWatch] = useState(false);
+  const [loadingSearch, setloadingSearch] = useState(false);
+  const [dateTimeStart, setDateTimeStart] = useState("");
+  const [dateTimeEnd, setDateTimeEnd] = useState("");
   const postList = useSelector((state) => state.slice.postList);
   const open_edit = useSelector((state) => state.slice.modalEdit);
+  const open = useSelector((state) => state.slice.open);
   const dispatch = useDispatch();
+  const { RangePicker } = DatePicker;
   useEffect(() => {
     if (open_edit == true) return;
     setLoading(true);
     axios
       .get(
-        `https://post-api.opensource-technology.com/api/posts?page=${current}&limit=${pageSize}`
+        `https://post-api.opensource-technology.com/api/posts?page=${current}&limit=${pageSize}&start_date=${dateTimeStart}&end_date=${dateTimeEnd}`
       )
       .then((res) => {
         // dispatch(setListPost(res.data.posts));
@@ -41,11 +49,14 @@ function Blog() {
         setLoading(false);
         return false;
       });
-  }, [current, pageSize, open_edit, watch]);
+  }, [current, pageSize, open_edit, watch, open, dateTimeStart]);
   const onSearch = async (value, _e, info) => {
+    setloadingSearch(true);
     setSearch(value.target.value);
     if (value.target.value == "") {
       setWatch(!watch);
+      setloadingSearch(false);
+      clearTimeout(timer);
       return;
     }
     clearTimeout(timer);
@@ -56,13 +67,15 @@ function Blog() {
         )
         .then((res) => {
           setState(res.data.posts);
+          setloadingSearch(false);
           setLoading(false);
         })
         .catch((err) => {
           setLoading(false);
+          setloadingSearch(false);
           return false;
         });
-    }, 500);
+    }, 1000);
 
     setTimer(newTimer);
   };
@@ -108,17 +121,37 @@ function Blog() {
         </Col>
       </Row>
     ));
+  const onChangeTime = (value, dateString) => {
+    setDateTimeEnd(dateString[1]);
+    setDateTimeStart(dateString[0]);
+  };
+  const onOk = (value) => {
+    console.log("onOk: ", value);
+  };
+  const width = window.innerWidth;
   return (
     <>
       <Row justify={true ? "center" : "start"} style={{ paddingTop: "30px" }}>
         <Col sm={24} md={12}>
-          <Search
-            onChange={onSearch}
-            placeholder="input search post"
-            style={{
-              width: "100%",
-            }}
-          />
+          <Row justify={width > 1000 ? "space-between" : "center"}>
+            <Col sm={24} md={10}>
+              <RangePicker
+                format="YYYY-MM-DD"
+                onChange={onChangeTime}
+                onOk={onOk}
+              />
+            </Col>
+            <Col xs={18} sm={24} md={12} style={{marginTop: width > 500 ? '': '15px'}}>
+              <Search
+                loading={loadingSearch}
+                onChange={onSearch}
+                placeholder="input search post"
+                style={{
+                  width: "100%",
+                }}
+              />
+            </Col>
+          </Row>
         </Col>
       </Row>
       {loading == false ? (
@@ -126,7 +159,7 @@ function Blog() {
           <div>{listItems}</div>
           {listItems.length ? (
             <Row
-              justify={true ? "end" : "start"}
+              justify={width > 1000 ? "end" : "center"}
               style={{ paddingTop: "20px", paddingBottom: "20px" }}
             >
               <Col sm={24} md={10}>
@@ -134,7 +167,8 @@ function Blog() {
                   showSizeChanger
                   onChange={onChange}
                   onShowSizeChange={onShowSizeChange}
-                  defaultCurrent={1}
+                  defaultCurrent={current}
+                  defaultPageSize={pageSize}
                   total={100}
                 />
               </Col>
@@ -145,7 +179,7 @@ function Blog() {
         </div>
       ) : (
         <div>
-          <Row justify='center'>
+          <Row justify="center">
             <Col sm={24} md={10}>
               <Skeleton active />
               <Skeleton active />

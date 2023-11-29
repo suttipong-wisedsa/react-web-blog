@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, Row, Col, Button, Progress, Skeleton } from "antd";
+import { Card, Row, Col, Button, Progress, Skeleton, DatePicker } from "antd";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Moment from "react-moment";
@@ -23,14 +23,18 @@ function Draft() {
   const [search, setSearch] = useState("");
   const [current, setCurrent] = useState("1");
   const [pageSize, setPageSize] = useState("10");
+  const [loadingSearch, setloadingSearch] = useState(false);
   const [timer, setTimer] = useState(null);
   const [load, setLoading] = useState(false);
   const [watch, setWatch] = useState(false);
+  const [dateTimeStart, setDateTimeStart] = useState("");
+  const [dateTimeEnd, setDateTimeEnd] = useState("");
+  const { RangePicker } = DatePicker;
   useEffect(() => {
     setLoading(true);
     axios
       .get(
-        `https://post-api.opensource-technology.com/api/posts/draft?page=${current}&limit=${pageSize}`
+        `https://post-api.opensource-technology.com/api/posts/draft?page=${current}&limit=${pageSize}&start_date=${dateTimeStart}&end_date=${dateTimeEnd}`
       )
       .then((res) => {
         setState(res.data.posts);
@@ -41,11 +45,14 @@ function Draft() {
         return false;
       });
     setLoading(false);
-  }, [current, pageSize, modalEdit,setdata]);
+  }, [current, pageSize, modalEdit, setdata, open, watch, dateTimeStart]);
   const onSearch = async (value, _e, info) => {
+    setloadingSearch(true);
     setSearch(value.target.value);
     if (value.target.value == "") {
       setWatch(!watch);
+      setloadingSearch(false);
+      clearTimeout(timer);
       return;
     }
     clearTimeout(timer);
@@ -56,13 +63,15 @@ function Draft() {
         )
         .then((res) => {
           setState(res.data.posts);
+          setloadingSearch(false);
           setLoading(false);
         })
         .catch((err) => {
+          setloadingSearch(false);
           setLoading(false);
           return false;
         });
-    }, 500);
+    }, 1000);
 
     setTimer(newTimer);
   };
@@ -120,6 +129,7 @@ function Draft() {
           }
         })
         .catch((err) => {
+          alert("Error");
           return false;
         });
     }
@@ -140,7 +150,7 @@ function Draft() {
                   <Moment date={val.created_at} format="YYYY/MM/DD HH:mm" />
                 </div>
               </Col>
-              <Col xs={24} sm={24} md={24} lg={13} xl={10}>
+              <Col xs={24} sm={24} md={24} lg={13} xl={8}>
                 <div style={{ alignSelf: "center", display: "flex" }}>
                   <Button
                     type="primary"
@@ -152,11 +162,15 @@ function Draft() {
                   <Button
                     type="primary"
                     onClick={() => publish(val)}
-                    style={{ marginRight: "5px" }}
+                    style={{ marginRight: "5px", backgroundColor: "green" }}
                   >
                     Published
                   </Button>
-                  <Button type="primary" onClick={() => delete_form(val.id)}>
+                  <Button
+                    type="primary"
+                    onClick={() => delete_form(val.id)}
+                    danger
+                  >
                     Delete
                   </Button>
                 </div>
@@ -167,18 +181,45 @@ function Draft() {
         </Col>
       </Row>
     ));
-
+  const onChangeTime = (value, dateString) => {
+    setDateTimeEnd(dateString[1]);
+    setDateTimeStart(dateString[0]);
+  };
+  const onOk = (value) => {
+    console.log("onOk: ", value);
+  };
+  const width = window.innerWidth;
   return (
     <>
       <Row justify={true ? "center" : "start"} style={{ paddingTop: "30px" }}>
         <Col sm={24} md={12}>
-          <Search
+          {/* <Search
+           loading={loadingSearch}
             onChange={onSearch}
             placeholder="input search post"
             style={{
               width: "100%",
             }}
-          />
+          /> */}
+          <Row justify={width > 1000 ? "space-between" : "center"}>
+            <Col sm={24} md={10}>
+              <RangePicker
+                format="YYYY-MM-DD"
+                onChange={onChangeTime}
+                onOk={onOk}
+              />
+            </Col>
+            <Col xs={18} sm={24} md={12} style={{marginTop: width > 500 ? '': '15px'}}>
+              <Search
+                loading={loadingSearch}
+                onChange={onSearch}
+                placeholder="input search post"
+                style={{
+                  width: "100%",
+                }}
+              />
+            </Col>
+          </Row>
         </Col>
       </Row>
       {load == false ? (
@@ -194,18 +235,19 @@ function Draft() {
                   showSizeChanger
                   onChange={onChange}
                   onShowSizeChange={onShowSizeChange}
-                  defaultCurrent={1}
+                  defaultCurrent={current}
+                  defaultPageSize={pageSize}
                   total={100}
                 />
               </Col>
             </Row>
           ) : (
-            <div style={{ textAlign: "center" }}>No data</div>
+            <div style={{ textAlign: "center",height:'80vh',display:'flex',alignItems:'center',justifyContent:'center' }}>No data</div>
           )}
         </div>
       ) : (
         <div>
-          <Row justify='center'>
+          <Row justify="center">
             <Col sm={24} md={10}>
               <Skeleton active />
               <Skeleton active />
