@@ -34,7 +34,7 @@ function Blog() {
   const dispatch = useDispatch();
   const { RangePicker } = DatePicker;
   useEffect(() => {
-    if (open_edit == true) return;
+    if (open_edit == true || open == true) return;
     setLoading(true);
     axios
       .get(

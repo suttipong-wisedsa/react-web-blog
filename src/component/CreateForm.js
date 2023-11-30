@@ -44,7 +44,7 @@ function CreateForm() {
     await axios
       .post(`https://post-api.opensource-technology.com/api/posts`, payload)
       .then((res) => {
-        console.log(res.data);
+        form.resetFields()
         if (pathname == "/") {
           dispatch(setData(true));
           setLoadings(false);
