@@ -227,10 +227,10 @@ function Draft() {
           <div>{listItems}</div>
           {listItems.length ? (
             <Row
-              justify={true ? "end" : "start"}
+              justify={true ? "center" : "start"}
               style={{ paddingTop: "20px", paddingBottom: "20px" }}
             >
-              <Col sm={24} md={10}>
+              <Col sm={24} md={8}>
                 <Pagination
                   showSizeChanger
                   onChange={onChange}

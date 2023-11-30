@@ -24,6 +24,7 @@ function CreateForm() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
+  const [form] = Form.useForm();
   const [loadings, setLoadings] = useState(false);
   const { hash, pathname, search } = location;
   const layout = {
@@ -39,22 +40,58 @@ function CreateForm() {
       content: values.Content,
       title: values.Title,
     };
-    setLoadings(true)
+    setLoadings(true);
     await axios
       .post(`https://post-api.opensource-technology.com/api/posts`, payload)
       .then((res) => {
-        console.log(res.data)
+        console.log(res.data);
         if (pathname == "/") {
-          dispatch(setData(true))
-          setLoadings(false)
+          dispatch(setData(true));
+          setLoadings(false);
           handleCancel();
-        }else {
-          setLoadings(false)
+        } else {
+          setLoadings(false);
           handleCancel();
         }
       })
       .catch((err) => {
-        setLoadings(false)
+        setLoadings(false);
+        alert("Error");
+      });
+  };
+  const publishNow = async () => {
+    const titleValue = form.getFieldValue("Title");
+    const contentValue = form.getFieldValue("Content");
+    if(contentValue == '' && titleValue == '') return;
+    let payload = {
+      content: contentValue,
+      title: titleValue,
+    };
+    await axios
+      .post(`https://post-api.opensource-technology.com/api/posts`, payload)
+      .then(async (res) => {
+        let payload = {
+          content: contentValue,
+          published: true,
+          title: titleValue,
+        };
+        await axios
+          .patch(
+            `https://post-api.opensource-technology.com/api/posts/${res.data.id}`,
+            payload
+          )
+          .then((res) => {
+            dispatch(setData(true));
+            setLoadings(false);
+            handleCancel();
+          })
+          .catch((err) => {
+            alert("Error");
+            return false;
+          });
+      })
+      .catch((err) => {
+        setLoadings(false);
         alert("Error");
       });
   };
@@ -78,6 +115,7 @@ function CreateForm() {
           <div title="New Post" style={{ width: "100%", marginTop: "20px" }}>
             <p>Title</p>
             <Form
+              form={form}
               name="nest-messages"
               onFinish={onFinish}
               style={{
@@ -121,7 +159,11 @@ function CreateForm() {
                       >
                         Save
                       </Button>
-                      <Button type="primary" style={{ width: "100%",backgroundColor: 'green' }}>
+                      <Button
+                        type="primary"
+                        style={{ width: "100%", backgroundColor: "green" }}
+                        onClick={() => publishNow()}
+                      >
                         Publish Now
                       </Button>
                     </div>

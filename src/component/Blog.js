@@ -159,10 +159,10 @@ function Blog() {
           <div>{listItems}</div>
           {listItems.length ? (
             <Row
-              justify={width > 1000 ? "end" : "center"}
+              justify={width > 1000 ? "center" : "center"}
               style={{ paddingTop: "20px", paddingBottom: "20px" }}
             >
-              <Col sm={24} md={10}>
+              <Col sm={24} md={9}>
                 <Pagination
                   showSizeChanger
                   onChange={onChange}
