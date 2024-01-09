@@ -3,7 +3,13 @@ import Blog from "./component/Blog";
 import { useNavigate } from "react-router-dom";
 import Nav from "./component/Nav";
 import { useSelector, useDispatch } from "react-redux";
-import { decrement, increment,modalOpen,closeModal } from "../src/redux/slice";
+import InputAddress from "react-thailand-address-autocomplete";
+import {
+  decrement,
+  increment,
+  modalOpen,
+  closeModal,
+} from "../src/redux/slice";
 import CreateForm from "../src/component/CreateForm";
 import EditForm from "./component/EditForm";
 import { Modal } from "antd";
